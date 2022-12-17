@@ -289,8 +289,9 @@ void LoopSeq::latchAll()
 
 void LoopSeq::pulse(ClockSource pulseSrc)
 {
-  // Trigger pulsewidth met/exceeded?
   clearExpiredGates();
+  if (!running) { return; }
+  // Trigger pulsewidth met/exceeded?
   latchAll();
 
   // Internal clock paused?

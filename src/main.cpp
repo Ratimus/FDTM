@@ -139,7 +139,7 @@ MCP3204 adc0;
 MCP3008 adc1;
 
 #include "SharedCtrl.h"
-const uint8_t SAMPLE_BUFFER_SIZE(128);
+const uint8_t SAMPLE_BUFFER_SIZE(1);
 
 /*
 HardwareCtrl Fader1(&adc1, 0, SAMPLE_BUFFER_SIZE);
@@ -205,6 +205,10 @@ MagicButton auxButton  (GATEin_PINS[3]);
 int8_t acc(0);
 void ICACHE_RAM_ATTR onTimer1()
 {  
+  for (uint8_t fd = 0; fd < 4; ++fd)
+  {
+    pFaders[fd]->service();
+  }
   if (acc == 0)
   {
     cli();
@@ -219,10 +223,6 @@ void ICACHE_RAM_ATTR onTimer1()
     return;
   }
 
-  for (uint8_t fd = 0; fd < 4; ++fd)
-  {
-    pFaders[fd]->service();
-  }
 
       encoder.service();
   modeButtonA.service();
@@ -272,7 +272,6 @@ void ICACHE_RAM_ATTR onTimer1()
   }
 #endif // RLR_DEBUG DEFINED
 }
-
 
 
 int16_t   ZERO(0);
@@ -334,8 +333,18 @@ ButtonState bnState[] { ButtonState::Open, ButtonState::Open };
 #include "bitHelpers.h"
 
 // TODO: clean up all these magic numbers once we've got the total HW configuration established
+bool initialized(0);
 void ReadCtrls()
 {
+  if (!initialized)
+  {
+    initialized = true;
+    for (uint8_t kn = 0; kn < 4; ++kn)
+    {
+      (pCV + kn)->select(selCH);
+      Serial.printf("control %d: %p\n", kn, (pCV + kn)->pACTIVE);
+    }
+  }
   bnState[0] = modeButtonA.readAndFree();
   bnState[1] = modeButtonB.readAndFree();
   ButtonState bn2(runButton.readAndFree());
@@ -421,9 +430,7 @@ void setup()
   display.display();
 
   adc0.begin(ADC0_CS); // Chip select pin.
-
   adc0.setSPIspeed(4000000);
-
   // Set up the menu system
   nav.idleTask = idle;       // Function to ping when menu is suspended
   nav.idleOn();              // Start up in idle state
@@ -438,11 +445,20 @@ void setup()
   timerAlarmWrite(timer1, ONE_KHZ_MICROS/10, true);
   timerAlarmEnable(timer1);
 
-  while (!pFaders[0]->isReady() || !pFaders[1]->isReady() || !pFaders[2]->isReady() || !pFaders[3]->isReady())
-  {
-    ;
-  }
-
+  long t0(micros());
+  while (!pFaders[0]->isReady()) { ; }
+  long t1(micros());
+  while (!pFaders[1]->isReady()) { ; }
+  long t2(micros());
+  while (!pFaders[2]->isReady()) { ; }
+  long t3(micros());
+  while (!pFaders[3]->isReady()) { ; }
+  long t4(micros());
+  Serial.printf("Fader 0 ready [%d uS]...",t1-t0);
+  Serial.printf("Fader 1 ready [%d uS]...",t2-t1);
+  Serial.printf("Fader 2 ready [%d uS]...",t3-t1);
+  Serial.printf("Fader 3 ready [%d uS]...\n",t4-t3);
+  delay(10);
   Serial.printf("ADC 0 initialized...\n");
   delay(20);
   TheSeq.setCmd(seqCmds::resetNowCmd);
