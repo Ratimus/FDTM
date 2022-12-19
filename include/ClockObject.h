@@ -31,7 +31,8 @@ public:
 
   hw_timer_t * lilTicker;
 
-  // Default constructor: use free-running internal clock
+  // BPM: tempo (in quarter notes)
+  // PPQN: pulses per quarter note
   ClockObject(uint16_t inBPM, uint16_t inPPQN);
   ~ClockObject() { ; }
 

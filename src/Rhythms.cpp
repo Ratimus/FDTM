@@ -326,8 +326,7 @@ uint8_t pattnSteps(int8_t ptn)
     shteppes = (uint8_t)(primes[ptn][0] & 0xFF);
   }
 
-
-Serial.printf("ptn %d: %d steps\n", ptn, shteppes);
+  Serial.printf("ptn %d: %d steps\n", ptn, shteppes);
   return shteppes;
 }
 ///////////////////////////////////////////////////////////////

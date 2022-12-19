@@ -30,7 +30,7 @@
 #define FDTM_IO_H_
 
 #include <Arduino.h>
-
+#include "MCP_ADC.h"
 ////////////////////////////////////////////////////////////////
 //                    DIGITAL IO PINS
 ////////////////////////////////////////////////////////////////
@@ -51,6 +51,9 @@ const uint8_t S_C_L(22);
 // ADC chip select pins
 const uint8_t ADC0_CS(15);
 // const uint8_t ADC1_CS();
+
+extern MCP3204 adc0;
+extern MCP3008 adc1;
 
 // GATE input pins
 const uint8_t GATEin_0(36);

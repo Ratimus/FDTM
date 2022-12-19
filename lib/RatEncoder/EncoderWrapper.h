@@ -21,9 +21,9 @@ public:
   EncoderWrapper(
     ClickEncoderInterface &EncoderInterface,
     RatRotaryEvent &Rotary) :
-      EI(EncoderInterface),
-      REI(Rotary),
-      _evt(encEvnts::NUM_ENC_EVNTS)
+  EI(EncoderInterface),
+  REI(Rotary),
+  _evt(encEvnts::NUM_ENC_EVNTS)
   { update(); }
 
   inline void update()

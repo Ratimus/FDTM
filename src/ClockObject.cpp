@@ -5,7 +5,7 @@
 // Ryan "Ratimus" Richardson
 // ------------------------------------------------------------------------
 #include "ClockObject.h"
-
+#include "LoopSeq.h"
 
 void ICACHE_RAM_ATTR countTicks()
 {
@@ -39,6 +39,8 @@ void ClockObject::PULSE()
   tickCounter %= PPQN;
   newClockFLAG = true;
   sei();
+
+  TheSeq.setCmd(seqCmds::pulseIntlCmd);
 }
 
 

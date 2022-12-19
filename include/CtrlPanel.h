@@ -1,25 +1,70 @@
-// #ifndef CTRLPANEL_H
-// #define CTRLPANEL_H
+#ifndef CTRLPANEL_H
+#define CTRLPANEL_H
+#include <Arduino.h>
+#include "MagicButton.h"
+#include "SharedCtrl.h"
+#include "MCP_ADC.h"
 
-// #include <Arduino.h>
-// #include "SharedCtrl.h"
+const uint8_t NUM_CV_INS(4);
+const uint8_t NUM_FADERS(4); // RLR_DEBUG
 
-// #include "MCP_ADC.h"
-// MCP3204 adc0;
-// MCP3008 adc1;
+extern MagicButton modeButtonA;
+extern MagicButton modeButtonB;
+extern MagicButton runButton;
+extern MagicButton auxButton;
 
-// #include "LoopSeq.h"
-// extern LoopSeq TheSeq;
-// extern TrkPts LOOP;
+const uint8_t SAMPLE_BUFFER_SIZE(16);
 
-// #include "SharedCtrl.h"
-// const uint8_t SAMPLE_BUFFER_SIZE(128);
-// const uint8_t NUM_CV_INS(4);
+void initADC();
+void initFaders();
 
-// int16_t   pointerToZeroPleaseDontAsk(0);
-// int16_t   HI_IDX(TheSeq.maxSteps-1);
-// int16_t * pPTR_HI(&(TheSeq.maxSteps));
-// int16_t * pZZZ(&pointerToZeroPleaseDontAsk);
+extern ModalCtrl * pCV;
+extern uint8_t selCH;
+
+extern HardwareCtrl Fader1;
+extern HardwareCtrl Fader2;
+extern HardwareCtrl Fader3;
+extern HardwareCtrl Fader4;
+
+extern HardwareCtrl* pFaders[NUM_FADERS];
+
+/*
+#include <ClickEncoder.h>
+#include <ClickEncoderInterface.h>
+#include <RatRotaryEvent.h>
+#include <EncoderWrapper.h>
+#include "LoopSeq.h"
+#include "ClockObject.h"
+#include "ClockDivider.h"
+
+extern Menu::EncoderWrapper encoderWrapper;
+extern Menu::RatRotaryEvent Rotareeeee;
+extern LoopSeq              TheSeq;
+extern TrkPts               LOOP;
+
+extern ClockObject  TheClock;
+
+extern ClockDivider DIV_A;
+extern ClockDivider DIV_B;
+extern ClockDivider DIV_C;
+extern ClockDivider DIV_D;
+
+void initADCs();
+void startADCs();
+void initTimer1();
+void startTimer1();
+void initSeq();
+void initDigitalInputs();
+
+void DoInputStuff();
+void readGateInputs();
+*/
+////////////////////////////////////////////////////////////////
+//                  GATE INPUTS
+////////////////////////////////////////////////////////////////
+
+
+#endif
 
 // HardwareCtrl CV_1(&adc0, 0, SAMPLE_BUFFER_SIZE);
 // HardwareCtrl CV_2(&adc0, 1, SAMPLE_BUFFER_SIZE);
@@ -276,5 +321,3 @@
 // VirtualCtrl * FADER_7[] =
 // { &endpt_CTRL[3], &lenth_CTRL[3], &cskew_CTRL[3], &jtter_CTRL[3], &efstA_CTRL[3], &efstB_CTRL[3] };
 // ModalCtrl CTRL_7(4, FADER_7);
-
-// #endif

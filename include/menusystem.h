@@ -33,26 +33,26 @@
 #define INCLUSION_GUARD_FOR_MENUSYSTEM_H
 #include <Arduino.h>
 #include "FDTM_IO.h"
-
-
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+//#include "CtrlPanel.h"
 #include "SeqAlgo.h"
 #include "LoopSeq.h"
 #include "SeqPattern.h"
 #include "ClockObject.h"
-
 #include "Rhythms.h"
-
 #include <EncoderWrapper.h>
 #include <RatRotaryEvent.h>
-extern Menu::EncoderWrapper encoderWrapper;
+// #include "SharedCtrl.h"
 
+extern Menu::EncoderWrapper encoderWrapper;
 #include "ClockDivider.h"
 extern ClockDivider DIV_A;
 extern ClockDivider DIV_B;
 extern ClockDivider DIV_C;
 extern ClockDivider DIV_D;
+// extern const int8_t ELASTIC_MODE;
+// extern const int8_t WINDOW_MODE;
 
 #include <menu.h>
 #include <menuIO/keyIn.h>
@@ -73,6 +73,7 @@ extern ClockDivider DIV_D;
 #define OLED_RESET -1    // Unused port - to keep the compiler happy
 
 extern Adafruit_SSD1306 display;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // MENU SYSTEM UTILITIES
@@ -98,7 +99,7 @@ result snoop(eventMask e,navNode& nav,prompt& item)
   Serial.println((long)nav.target,HEX);
   showPath(*nav.root);
   Serial.print(e);
-  Serial.printf("item: %s\n",item.getText());
+  Serial.printf("\nitem: %s\n",item.getText());
   switch(e) {
     case noEvent://just ignore all stuff
       Serial.println(" noEvent");break;
@@ -131,7 +132,6 @@ result snoop(eventMask e,navNode& nav,prompt& item)
 // LOOP POINTS
 ///////////////////////////////////////////////////////////////////////////////////////
 extern TrkPts LOOP;
-
 MENU(indexMenu," Loop Points",doNothing,noEvent,noStyle,
   FIELD(LOOP.S1.D, " 1 Start...", "",0,31,1,0,doNothing,noEvent,wrapStyle),
   FIELD(LOOP.E1.D, " 1 End.....", "",0,31,1,0,doNothing,noEvent,wrapStyle),
@@ -190,7 +190,7 @@ SELECT(DIV_D.SOURCE.D,subMenu_dCLKSRC," D Clock",doNothing,noEvent,noStyle,
  VALUE("  Clone B",CLONE_B,        doNothing, noEvent),
  VALUE(" Intl Clk",INTERNAL_CLK,   doNothing, noEvent));
 
-MENU(clkSrcMenu, " Clock Srcs",snoop,anyEvent,noStyle,
+MENU(clkSrcMenu, " Clock Srcs",doNothing,noEvent,noStyle,
   SUBMENU(subMenu_aCLKSRC),
   SUBMENU(subMenu_bCLKSRC),
   SUBMENU(subMenu_cCLKSRC),
@@ -205,6 +205,7 @@ MENU(clkSrcMenu, " Clock Srcs",snoop,anyEvent,noStyle,
  VALUE("1/64",64,doNothing,noEvent),\
  VALUE("1/32",32,doNothing,noEvent),\
  VALUE("1/16",16,doNothing,noEvent),\
+ VALUE("1/8",8,doNothing,noEvent),\
  VALUE("1/7",7,doNothing,noEvent),\
  VALUE("1/6",6,doNothing,noEvent),\
  VALUE("1/5",5,doNothing,noEvent),\
@@ -306,16 +307,17 @@ const colorDef<uint16_t> colors[] MEMMODE =
   {{BLACK,WHITE},{WHITE,BLACK,BLACK}}, // titleColor
 };
 
+extern RatRotaryEvent Rotareeeee;
 
-extern RatRotaryEvent reeeee;
-MENU_INPUTS(in,&reeeee);
+MENU_INPUTS(in,&Rotareeeee)
+
 
 MENU_OUTPUTS(out,MAX_DEPTH
   ,ADAGFX_OUT(display,colors,fontX,fontY,{0,0,gfxWidth/fontX,gfxHeight/fontY})
   ,NONE                       // Must have 2 items at least if using this macro
-);
+)
 
-NAVROOT(nav,mainMenu,MAX_DEPTH,in,out);
+NAVROOT(nav,mainMenu,MAX_DEPTH,in,out)
 
 
 #endif

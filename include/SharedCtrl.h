@@ -8,8 +8,6 @@
 // Unlock knob when within this percent difference from the lock value
 static const uint8_t MAX_BUFFER_SIZE(128);
 static const double  DEFAULT_THRESHOLD(0.05);
-static const uint8_t DEFAULT_HYSTERESIS(100);
-
 
 ////////////////////////////////////////////////
 // 
@@ -30,7 +28,7 @@ public:
 
 ////////////////////////////////////////////////
 // 
- HardwareCtrl(MCP_ADC* inAdc, uint8_t inCh,
+ explicit HardwareCtrl(MCP_ADC* inAdc, uint8_t inCh,
               uint8_t numSamps = 1) :
     pADC(inAdc),
     ch(inCh),
@@ -39,7 +37,14 @@ public:
     sampleIdx(0),
     sum(0),
     bufferReady(false)
-  { ; }
+  {
+    cli();
+    for (uint8_t ii = 0; ii < MAX_BUFFER_SIZE; ++ii)
+    { 
+      buff[ii] = 0;
+    }
+    sei();
+  }
 
   ////////////////////////////////////////////////
   // 
@@ -163,10 +168,10 @@ public:
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
   // (        (       (      (     (    (   (  ( (KONSTRUKTOR) )  )   )    )     )      )       )        ) //
   explicit LockingCtrl(
-    HardwareCtrl* inKnob,
+    HardwareCtrl* inCtrl,
     int16_t        inVal = 0,
     bool    createLocked = true):
-  pCTRL   (inKnob),
+  pCTRL   (inCtrl),
   adcMax  (pCTRL->maxValue()),
   lockVal (inVal)
   {
@@ -239,7 +244,7 @@ protected:
       cli();
       state = STATE_UNLOCKED;
       sei();
-      // Serial.printf("%p UNLOCKED @ %d [%d]\n", this, tmpVal, pCTRL->read());
+      Serial.printf("%p UNLOCKED @ %d [%d]\n", this, tmpVal, pCTRL->read());
       return tmpVal;
     }
     
@@ -325,7 +330,6 @@ class VirtualCtrl : public LockingCtrl
   int16_t hi;
 
   int16_t lockSlice;
-  bool noiseLockout;
 
 public:
 
@@ -333,19 +337,18 @@ public:
 
   ////////////////////////////////////////////////
   // 
-  VirtualCtrl(HardwareCtrl* inKnob,
+  explicit VirtualCtrl(HardwareCtrl* inCtrl,
               int16_t inSlice,
               int16_t inHI,
               int16_t inLO         = 0,
               bool    createLocked = true):
-    LockingCtrl(inKnob, false),
+    LockingCtrl(inCtrl, inSlice, true),
   hi(inHI),
   lo(inLO),
   pointsOut(false),
   hiVal(&hi),
   loVal(&lo),
-  lockSlice(inSlice),
-  noiseLockout(false)
+  lockSlice(inSlice)
   {
     if (createLocked)
     {
@@ -355,21 +358,20 @@ public:
 
   ////////////////////////////////////////////////
   // 
-  VirtualCtrl(HardwareCtrl* inKnob,
+  explicit VirtualCtrl(HardwareCtrl* inCtrl,
               int16_t  inSlice,
               int16_t* inHI,
               int16_t  hiOFFSET     = -1,
               int16_t* inLO         = sharedZERO,
               int16_t  loOFFSET     = 0,
               bool     createLocked = true):
-    LockingCtrl(inKnob, false),
+    LockingCtrl(inCtrl, inSlice, true),
   hi(hiOFFSET),
   lo(loOFFSET),
   pointsOut(true),
   hiVal(inHI),
   loVal(inLO),
-  lockSlice(inSlice),
-  noiseLockout(false)
+  lockSlice(inSlice)
   {
     if (createLocked)
     {
@@ -392,7 +394,7 @@ public:
     int16_t rangeHi(*hiVal + (int16_t)pointsOut * hi);
     int16_t rangeLo(*loVal + (int16_t)pointsOut * lo);
 
-    int16_t tgtVal(map(tgtSlice, rangeLo, rangeHi, 0, adcMax));
+    int16_t tgtVal(map(tgtSlice, rangeLo, rangeHi+1, 0, adcMax+1));
     return tgtVal;
   }
 
@@ -403,7 +405,7 @@ public:
     int16_t rangeHi(*hiVal + (int16_t)pointsOut * hi);
     int16_t rangeLo(*loVal + (int16_t)pointsOut * lo);
 
-    return map(val, 0, adcMax, rangeLo, 1+rangeHi);
+    return map(val, 0, adcMax+1, rangeLo, 1+rangeHi);
   }
   
   ////////////////////////////////////////////////
@@ -417,42 +419,53 @@ public:
     sei();
 
     // Return lockVal if locked
-    if (tmpState == STATE_LOCKED || pCTRL->isReady() == false)
+    if (tmpState == STATE_LOCKED || !pCTRL->isReady())
     {
       return lockSlice;
     }
 
-    // Update the unlock target reading of our parent class in case the number of slices has
-    // changed, since the ctrl position corresponding to that slice would also have changed
-    // (e.g. if you lock on step 2 of 4 and then switch to 16 steps, you'd inadvertently unlock
-    // somewhere around step 8)
+
     int16_t rangeHi(*hiVal + (int16_t)pointsOut * hi);
     int16_t rangeLo(*loVal + (int16_t)pointsOut * lo);
 
     int16_t tmpVal(pCTRL->read());
     int16_t tmpSlice(valToSlice(tmpVal));
 
-    int16_t tgtVal(sliceToVal(tmpSlice));
-
-    if ( ((lockSlice < tmpSlice) && (tgtVal - tmpVal < 50))
-      || ((lockSlice > tmpSlice) && (tmpVal - tgtVal < 50)) )
+    if (tmpState == STATE_UNLOCK_REQUESTED)
     {
-      if (tmpState == STATE_UNLOCK_REQUESTED)
-      { 
-        // Serial.printf("%p LOCK->UNLOCK]\n", this);
-        tmpState = STATE_UNLOCKED;
+      if (tmpSlice == lockSlice)
+      {
         cli();
-        state = tmpState;
+        state = STATE_UNLOCKED;
         sei();
+        // Serial.printf("%p LOCK->UNLOCK; slice: %d, lockSlice: %d, val: %d\n", this, tmpSlice,
+          lockSlice, tmpVal);
+        // Serial.printf(" hiVal: %d, loVal: %d, rangeHi: %d, rangeLo: %d\n",*hiVal, *loVal, rangeHi, rangeLo);
       }
-
-      if (tmpState == STATE_UNLOCKED)
+    }
+    else if(tmpSlice > lockSlice)
+    {
+      int16_t exc(tmpVal - sliceToVal(tmpSlice));
+      if (exc > 50)// && exc < 50)
       {
         lockSlice = tmpSlice;
+        // Serial.printf("%p @ slice %d [%d] (tgt val: %d)\n", this, tmpSlice, tmpVal, sliceToVal(tmpSlice));
       }
-      // Serial.printf("%p @ slice %d [%d] (tgt val: %d)\n", this, tmpSlice, tmpVal, tgtVal);
     }
-    
+    else
+    {
+      int16_t exc(sliceToVal(lockSlice) - tmpVal);
+      if (exc > 50)// && exc < 50)
+      {
+        // Serial.printf("%p @ slice %d [%d] (tgt val: %d)\n", this, tmpSlice, tmpVal, sliceToVal(lockSlice));
+        lockSlice = tmpSlice;
+      }
+    }
+
+    // Update the unlock target reading of our parent class in case the number of slices has
+    // changed, since the ctrl position corresponding to that slice would also have changed
+    // (e.g. if you lock on step 2 of 4 and then switch to 16 steps, you'd inadvertently unlock
+    // somewhere around step 8)
     return lockSlice;
   }
 };
@@ -470,9 +483,9 @@ public:
 
   ////////////////////////////////////////////////
   // 
-  ArrayCtrl(HardwareCtrl* inKnob,
+  ArrayCtrl(HardwareCtrl* inCtrl,
             int16_t*      arr, size_t count, int16_t stIdx = 0):
-    VirtualCtrl(inKnob, stIdx, (int16_t)(count-1)),
+    VirtualCtrl(inCtrl, stIdx, (int16_t)(count-1)),
   pARR(arr),
   size(count),
   iter(stIdx)

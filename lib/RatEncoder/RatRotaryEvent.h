@@ -39,10 +39,10 @@ template<class T> inline T& operator^= (T& a, T b) { return (T&)((int&)a ^= (int
       public:
 
         enum EventType {
+          ROTARY_NONE               = 0,
           BUTTON_CLICKED            = 1 << 0,
           BUTTON_DOUBLE_CLICKED     = 1 << 1,
           BUTTON_LONG_PRESSED       = 1 << 2,
-
           ROTARY_CW                 = 1 << 3,
           ROTARY_CCW                = 1 << 4,
         };
@@ -51,7 +51,7 @@ template<class T> inline T& operator^= (T& a, T b) { return (T&)((int&)a ^= (int
         EventType events;  // we could do a fifo if we miss events
 
         RatRotaryEvent(EventType c)
-          :config(c) {
+          :config(c),events(ROTARY_NONE) {
           // config for future use. we could raise if
           // we are missing essential stuff
           // and we need to absorb an arg anyway...
@@ -87,7 +87,7 @@ template<class T> inline T& operator^= (T& a, T b) { return (T&)((int&)a ^= (int
           }
 
           else
-            return -1;
+          { return -1;}
         }
 
         void flush() override {}

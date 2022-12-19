@@ -75,10 +75,8 @@ public:
     state[1]   = state[0];
     doubleClickEnabled = doubleClickable;
     outputCleared = true;
-    if (pin >=0)
-    {
-      pinMode(pin, pullup ? INPUT_PULLUP : INPUT);
-    }
+    
+    pinMode(pin, pullup ? INPUT_PULLUP : INPUT);
   }
 
   void service();

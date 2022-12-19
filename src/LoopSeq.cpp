@@ -149,6 +149,7 @@ void LoopSeq::validatePattns(bool force)
 // at that track's current playhead position
 void LoopSeq::oledPrint16(bool A, int8_t trk)
 {
+  return; // RLR_DEBUG
   display.setCursor(0, trk * 8);
 
   int8_t cellSize(LOOP.START[trk]->Q - LOOP.END[trk]->Q);
@@ -271,7 +272,7 @@ void LoopSeq::updateTrkBank(ModalCtrl (* arr), uint8_t trk)
   LOOP.START  [trk]->clockIn((arr    )->readActiveCtrl());
   LOOP.END    [trk]->clockIn((arr + 1)->readActiveCtrl());
   DIV[trk]->DIVISION.clockIn((arr + 2)->readActiveCtrl());
-  DIV    [trk]->SKEW.clockIn((arr + 3)->readActiveCtrl());
+  DIV[trk]->    SKEW.clockIn((arr + 3)->readActiveCtrl());
 }
 
 
@@ -338,7 +339,7 @@ void LoopSeq::pulse(ClockSource pulseSrc)
 
     // Only output gates on tracks that are active this pulse
     newGatesON(gateByte & pulseByte);
-    patternOled(A);
+    // patternOled(A);
   }
 }
 

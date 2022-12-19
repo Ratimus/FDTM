@@ -15,8 +15,8 @@
 
 class ModalCtrl;
 
-extern const int8_t  ELASTIC_MODE;
-extern const int8_t  WINDOW_MODE;
+extern const int8_t ELASTIC_MODE;
+extern const int8_t WINDOW_MODE;
 
 class TrkPts
 {
