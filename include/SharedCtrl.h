@@ -438,8 +438,7 @@ public:
         cli();
         state = STATE_UNLOCKED;
         sei();
-        // Serial.printf("%p LOCK->UNLOCK; slice: %d, lockSlice: %d, val: %d\n", this, tmpSlice,
-          lockSlice, tmpVal);
+        // Serial.printf("%p LOCK->UNLOCK; slice: %d, lockSlice: %d, val: %d\n", this, tmpSlice,lockSlice, tmpVal);
         // Serial.printf(" hiVal: %d, loVal: %d, rangeHi: %d, rangeLo: %d\n",*hiVal, *loVal, rangeHi, rangeLo);
       }
     }
