@@ -108,10 +108,15 @@ public:
   void recalcLength(uint8_t trk);
   void recalcEndpt(uint8_t trk);
   void updateStPts(ModalCtrl (* arr));
+  void updateStPts(ModalCtrl * pMC, uint8_t trk);
   void updateNdPts(ModalCtrl (* arr));
+  void updateNdPts(ModalCtrl * pMC, uint8_t trk);
   void updateOffst(ModalCtrl (* arr));
+  void updateOffst(ModalCtrl * pMC, uint8_t trk);
   void updateLngth(ModalCtrl (* arr));
+  void updateLngth(ModalCtrl * pMC, uint8_t trk);
   void updateJumps(ModalCtrl (* arr));
+  void updateJumps(ModalCtrl * pMC, uint8_t trk);
   void updateTrkBank(ModalCtrl (* arr), uint8_t trk);
   LoopSeq();
 };

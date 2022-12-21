@@ -1,68 +1,42 @@
-         keyIn.h: generic buttons
-      altKeyIn.h: generic buttons w/PULL resistor specification{?}
-     softKeyIn.h: generic buttons w/SW debounce
-     serialOut.h: standard serial output {what can it do?}
+Repetitor per-track params:
+ -start point
+ -end point
+ -offset
+ -clock div
+ -clock skew
 
-see [inputs] and [initialization] sections of wiki
-see [navigation]
-///////////////////////////////////////////////////////////////
-menu iteration depends on your code to call its functions to iterate
-menu calls your functions upon iteration
-
-menu execution/iteration is done by calling API functions as mbrs of navRoot
----------------------------------------------
-void poll()            // Handles all IO; full-auto mode
-inline void doInput()  // checks input list for available data
-inline void doOutput() // checks for output needs, redraws changed user vals
-
-idea: two (or more?) clock sources selectable per divider, with independent div, skew, and seq steps
-e.g.:
----------------------
-channel 1 A:
- source: Gate In X
-    div: x2
-   skew:  0
-  steps:  1
----------------------
-channel 1 B:
-source: 1 A Output
-   div: 2/3
-  skew: 1
- steps: -2
----------------------
-would give us:
-
-X in:
-X               X               X               X               X               X               X               X
-
-ch1A div:
-1   2   3   4   1   2   3   4   1   2   3   4   1   2   3   4   1   2   3   4   1   2   3   4   1   2   3   4   1
-
-seq track: (S = 2, E = 7)
-2   3   4   5   6   7] [2   3   4   5   6   7] [2   3   4   5   6   7] [2   3   4   5   6   7] [2   3   4   5   6
-
-ch1B div:
-_________________________           _________________________           _________________________
-1           2           3]- - - - -[1           2           3]- - - - -[1           2           3]          1
-ch1B skewed:
-        X           X           X           X           X           X           X           X           X        
-seq track:
-        2           6           4           2           6           4           2           6           4
-
-
-together:
-_______________ _______________ _______________ _______________ _______________ _______________ _______________
-X               X               X               X               X               X               X               X
-_________________________________________       _________________________________________       __________________
-2       3       4       5       6       7       2       3       4       5       6       7       2       3       4  
-    _________________________           _________________________           _________________________ 
-    2           6           4           2           6           4           2           6           4
+Mask types:
+euclidean [mod = fill]
+random    [mod = probability]
+archetype [mod = role]
 
 
 
-X               X               X               X               X               X               X               X
-2   2   3       10      5   4   6       9       2   6   3       8       5   2   6       13      2   4   3       4
-    
+
+ Euclidean per-track params:
+ -length (determined by start and end points)
+ -offset (determined by offset)
+ -fill
+
+ Probablistic per-track params:
+ -probability of step      [e.g. pattern OR]
+ -probability of !pattern  [e.g. NOT pattern]
+ -probability of pattern B
+
+
+
+shadow divider: follows primary clock divider input, but applies probablistic logic to combine
+e.g. primary track SRC = pattn A
+
+ -> so do we need to build the euclidean reductions into the clock dividers instead of the patterns?
+nope. we want to combo logic the patterns, not the clocks
+Euclidean + fill
+Random + probability
+
+
+
+
+pattern:   X--X--X-X--X-X-X-X-XX-X-XX-X-X-
 
 
 
@@ -72,7 +46,37 @@ X               X               X               X               X               
 
 
 
-*allow output of one divider to be the input of another
+ -step size (does anyone actually care about this one? - NO.)
 
 
+gate inputs:
+Clock
+Reset
+Mod 1
+Mod 2
+
+select dest. or replace track
+
+
+
+track 1 - 4:
+
+
+track 5 - 8:
+Euclidean patterns w/ length determined by tracks 1 - 4
+
+track swap
+jitter
+pattern a
+pattern b
+x-fade
+=======================================
+Pattern A/B
+  - Xfade from A to B
+
+Euclidean
+  - Global fill
+
+TM
+  - Bit flip
 

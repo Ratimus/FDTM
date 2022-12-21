@@ -23,7 +23,8 @@ class SeqPattern
   latchable<int8_t> stepsB;
 
   const int8_t & mode;
-
+  int8_t laneShift;
+  
 public:
   int8_t   playHeads[TRAX_PER_PATN];
   
@@ -50,6 +51,7 @@ public:
   void restartPlayheads();
 
   SeqPattern (int8_t pattnA, int8_t pattnB, int8_t inMode);
+  void swapTracks(bool fwd = true);
 };
 
 #endif

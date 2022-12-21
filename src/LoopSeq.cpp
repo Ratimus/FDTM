@@ -80,7 +80,6 @@ LoopSeq::LoopSeq() :
 
 void LoopSeq::reset()
 {
-  Serial.println("Sequencer reset");
   if (!pendingResetFLAG)            // Forced reset
   {
     ThePattn.resetPlayheads();      // Playheads to ZERO
@@ -101,6 +100,7 @@ void LoopSeq::reset()
 
   patternOled(1);
 }
+
 
 // Fetch pattern length from Pattn 
 void LoopSeq::updateMaxSteps()
@@ -191,6 +191,7 @@ void LoopSeq::patternOled(bool A)
   display.display();
 }
 
+
 void LoopSeq::recalcLength(uint8_t trk)
 {
   int16_t before(LOOP.STEPS[trk]->Q);
@@ -204,6 +205,7 @@ void LoopSeq::recalcLength(uint8_t trk)
     Serial.printf("TRK %d: steps before: %d, steps after: %d\n",trk,before,LOOP.STEPS[trk]->Q);
 }
 
+
 // Start point moved but Length stays consistent: End point moves in tandem
 void LoopSeq::recalcEndpt(uint8_t trk)
 {
@@ -213,7 +215,16 @@ void LoopSeq::recalcEndpt(uint8_t trk)
   LOOP.END[trk]->clockIn(newEnd);
 
   if (LOOP.END[trk]->Q != before)
-    Serial.printf("TRK %d: end before: %d, end after: %d, start: %d,  steps: %d\n",trk,before,LOOP.END[trk]->Q, LOOP.START[trk]->Q, LOOP.STEPS[trk]->Q);
+  {
+    Serial.printf("TRK %d: end before: %d, end after: %d, start: %d,  steps: %d\n",
+    trk,before,LOOP.END[trk]->Q, LOOP.START[trk]->Q, LOOP.STEPS[trk]->Q);
+  }
+}
+
+
+void LoopSeq::updateStPts(ModalCtrl * pMC, uint8_t trk)
+{
+  LOOP.START[trk]->clockIn(pMC->readActiveCtrl());
 }
 
 
@@ -221,8 +232,14 @@ void LoopSeq::updateStPts(ModalCtrl (* arr))
 {
   for (uint8_t trk = 0; trk < TRAX_PER_PATN; ++trk)
   {
-    LOOP.START[trk]->clockIn((arr + trk)->readActiveCtrl());
+    updateStPts(arr+trk, trk);
   }
+}
+
+
+void LoopSeq::updateNdPts(ModalCtrl * pMC, uint8_t trk)
+{
+  LOOP.END[trk]->clockIn(pMC->readActiveCtrl());
 }
 
 
@@ -230,8 +247,15 @@ void LoopSeq::updateNdPts(ModalCtrl (* arr))
 {
   for (uint8_t trk = 0; trk < TRAX_PER_PATN; ++trk)
   {
-    LOOP.END[trk]->clockIn((arr + trk)->readActiveCtrl());
+    updateNdPts(arr+trk, trk);
   }
+}
+
+
+void LoopSeq::updateOffst(ModalCtrl * pMC, uint8_t trk)
+{
+  LOOP.START[trk]->clockIn(pMC->readActiveCtrl());
+  recalcEndpt(trk);
 }
 
 
@@ -239,9 +263,18 @@ void LoopSeq::updateOffst(ModalCtrl (* arr))
 {
   for (uint8_t trk = 0; trk < TRAX_PER_PATN; ++trk)
   {
-    LOOP.START[trk]->clockIn((arr + trk)->readActiveCtrl());
-    recalcEndpt(trk);
+    updateOffst(arr+trk, trk);
   }
+}
+
+
+void LoopSeq::updateLngth(ModalCtrl * pMC, uint8_t trk)
+{
+  int16_t before(LOOP.STEPS[trk]->Q);
+  int16_t after(LOOP.STEPS[trk]->clockIn(pMC->readActiveCtrl()));
+  if (after != before) { Serial.printf("TRK %d: steps before: %d, steps after: %d\n",trk,before,LOOP.STEPS[trk]->Q); }
+  recalcEndpt(trk);
+  LOOP.JUMP[trk]->clockIn(pMC->readActiveCtrl());
 }
 
 
@@ -249,12 +282,14 @@ void LoopSeq::updateLngth(ModalCtrl (* arr))
 {
   for (uint8_t trk = 0; trk < TRAX_PER_PATN; ++trk)
   {
-    int16_t before(LOOP.STEPS[trk]->Q);
-    int16_t after(LOOP.STEPS[trk]->clockIn((arr + trk)->readActiveCtrl()));
-    if (after != before)
-      Serial.printf("TRK %d: steps before: %d, steps after: %d\n",trk,before,LOOP.STEPS[trk]->Q);
-    recalcEndpt(trk);
+    updateLngth(arr+trk, trk);
   }
+}
+
+
+void LoopSeq::updateJumps(ModalCtrl * pMC, uint8_t trk)
+{
+  LOOP.JUMP[trk]->clockIn(pMC->readActiveCtrl());
 }
 
 
@@ -262,11 +297,12 @@ void LoopSeq::updateJumps(ModalCtrl (* arr))
 {
   for (uint8_t trk = 0; trk < TRAX_PER_PATN; ++trk)
   {
-    LOOP.JUMP[trk]->clockIn((arr + trk)->readActiveCtrl());
+    updateJumps(arr+trk, trk);
   }
 }
 
 ClockDivider * DIV[] = { &DIV_A, &DIV_B, &DIV_C, &DIV_D };
+
 void LoopSeq::updateTrkBank(ModalCtrl (* arr), uint8_t trk)
 {
   LOOP.START  [trk]->clockIn((arr    )->readActiveCtrl());
@@ -308,7 +344,7 @@ void LoopSeq::pulse(ClockSource pulseSrc)
   pulseByte |= DIV_C.pulse(pulseSrc);
   pulseByte |= DIV_D.pulse(pulseSrc);
 
-  if (pendingResetFLAG && pulseByte != 0)
+  if (pendingResetFLAG)
   {
     reset();
   }
@@ -317,6 +353,7 @@ void LoopSeq::pulse(ClockSource pulseSrc)
   if (pulseByte != 0)
   {
     uint8_t gateByte(0);
+
     bool A(random(0, 100) > PROB_KNOB);
     // Serial.printf("Using %s pattern [%2d]\n", A ? "LEFT" : "RIGHT", ThePattn.getSeed(A));
 
@@ -440,7 +477,8 @@ void LoopSeq::setCmd(seqCmds cmd)
     break;
 
   case seqCmds::mod2Cmd:
-    pulse(ClockSource::MOD2_GATEIN);
+    ThePattn.swapTracks();
+    // pulse(ClockSource::MOD2_GATEIN);
     break;
 
   case seqCmds::pulseIntlCmd:
@@ -457,7 +495,7 @@ void LoopSeq::setCmd(seqCmds cmd)
 
   case seqCmds::resetPendingCmd:
     ThePattn.restartPlayheads();
-    patternOled(1);
+    // patternOled(1);
     pendingResetFLAG = true;
     break;
 

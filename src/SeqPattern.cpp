@@ -17,7 +17,8 @@ SeqPattern::SeqPattern (int8_t pattnA, int8_t pattnB, int8_t inMode) :
   mode(inMode),
   playHeads {0,0,0,0},
   pendingA(1),
-  pendingB(1)
+  pendingB(1),
+  laneShift(0)
 {
   latchInPattern(1, true);
   latchInPattern(0, true);
@@ -168,6 +169,14 @@ void SeqPattern::restartPlayheads()
 }
 
 
+  void SeqPattern::swapTracks(bool fwd)
+  {
+    if (fwd) { ++laneShift; }
+    else     { --laneShift; }
+
+    laneShift %= TRAX_PER_PATN;
+  }
+
 // Tell me which bank to read and which track, I'll tell you 
 // what the pattern looks like at the current playhead position
 // for that track. The idea is that the caller needs to know as
@@ -176,8 +185,9 @@ void SeqPattern::restartPlayheads()
 // object in direct contact with the pattern data
 bool SeqPattern::readBit(bool A, int8_t trk)
 {
+  int8_t idx((trk + laneShift) % TRAX_PER_PATN);
   bool ret(0);
-  uint8_t bitN(playHeads[trk]);
+  uint8_t bitN(playHeads[idx]);
 
   int8_t seedNum(A ? seedA.Q : seedB.Q);
   int8_t M(A ? stepsA.Q : stepsB.Q);
@@ -191,7 +201,7 @@ bool SeqPattern::readBit(bool A, int8_t trk)
   {
     int8_t rB(bitN % M);
     int8_t iB(31 - rB);
-    bool vB = (bool)(primes[seedNum][trk+1] & BITMASK_32[iB]);
+    bool vB = (bool)(primes[seedNum][idx+1] & BITMASK_32[iB]);
     ret = vB;
   }
   

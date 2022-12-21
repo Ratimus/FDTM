@@ -445,7 +445,7 @@ public:
     else if(tmpSlice > lockSlice)
     {
       int16_t exc(tmpVal - sliceToVal(tmpSlice));
-      if (exc > 50)// && exc < 50)
+      if (exc > 50)
       {
         lockSlice = tmpSlice;
         // Serial.printf("%p @ slice %d [%d] (tgt val: %d)\n", this, tmpSlice, tmpVal, sliceToVal(tmpSlice));
@@ -454,17 +454,13 @@ public:
     else
     {
       int16_t exc(sliceToVal(lockSlice) - tmpVal);
-      if (exc > 50)// && exc < 50)
+      if (exc > 50)
       {
         // Serial.printf("%p @ slice %d [%d] (tgt val: %d)\n", this, tmpSlice, tmpVal, sliceToVal(lockSlice));
         lockSlice = tmpSlice;
       }
     }
 
-    // Update the unlock target reading of our parent class in case the number of slices has
-    // changed, since the ctrl position corresponding to that slice would also have changed
-    // (e.g. if you lock on step 2 of 4 and then switch to 16 steps, you'd inadvertently unlock
-    // somewhere around step 8)
     return lockSlice;
   }
 };

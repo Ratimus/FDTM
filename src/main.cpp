@@ -251,6 +251,11 @@ void ReadCtrls()
   bnState[1] = modeButtonB.readAndFree();
   ButtonState bn2(runButton.readAndFree());
 
+  if (bnState[1] == ButtonState::DoubleClicked)
+  {
+    TheSeq.setCmd(seqCmds::mod2Cmd);
+  }
+  
   if (bn2 == ButtonState::DoubleClicked)
   {
     TheSeq.setCmd(seqCmds::resetPendingCmd);
