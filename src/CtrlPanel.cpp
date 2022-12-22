@@ -83,8 +83,8 @@ int16_t * VirtualCtrl::sharedZERO(&ZERO);
 int16_t * pPTR_HI(&(TheSeq.maxSteps));
 int16_t   HI_IDX(TheSeq.maxSteps-1);
 
-size_t  NUM_DIVS(15);
-int16_t CLK_DIVS[] = { 64, 32, 16, 12, 8, 7, 6, 5, 4, 3, 2, 1, -2, -3, -4, -6, -8 };
+size_t  NUM_DIVS(16);
+int16_t CLK_DIVS[] = { 64, 32, 16, 8, 7, 6, 5, 4, 3, 2, 1, -2, -3, -4, -6, -8 };
 
 // START POINT
 VirtualCtrl start_TEST[4] = {
@@ -102,10 +102,10 @@ VirtualCtrl endpt_TEST[4] = {
 };
 // CLOCK DIVIDE
 ArrayCtrl clkdv_TEST[4] = {
-  ArrayCtrl(pFaders[2], CLK_DIVS, NUM_DIVS, 11),
-  ArrayCtrl(pFaders[2], CLK_DIVS, NUM_DIVS, 11),
-  ArrayCtrl(pFaders[2], CLK_DIVS, NUM_DIVS, 11),
-  ArrayCtrl(pFaders[2], CLK_DIVS, NUM_DIVS, 11)
+  ArrayCtrl(pFaders[2], CLK_DIVS, NUM_DIVS, 10),
+  ArrayCtrl(pFaders[2], CLK_DIVS, NUM_DIVS, 10),
+  ArrayCtrl(pFaders[2], CLK_DIVS, NUM_DIVS, 10),
+  ArrayCtrl(pFaders[2], CLK_DIVS, NUM_DIVS, 10)
 };
 
 // CLOCK SKEW

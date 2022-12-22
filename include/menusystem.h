@@ -257,10 +257,10 @@ MENU(clockSubMenu," Clock Settings",doNothing,noEvent,noStyle,
 // SEQUENCER STEPS PER CLOCK
 ///////////////////////////////////////////////////////////////////////////////////////
 MENU(seqTrackMenu, " Steps per Clock",doNothing,noEvent,noStyle,
-  FIELD(LOOP.J1.D,  " Trk1   ", "", -4,4,1,0,doNothing,noEvent,noStyle),
-  FIELD(LOOP.J2.D,  " Trk2   ", "", -4,4,1,0,doNothing,noEvent,noStyle),
-  FIELD(LOOP.J3.D,  " Trk3   ", "", -4,4,1,0,doNothing,noEvent,noStyle),
-  FIELD(LOOP.J4.D,  " Trk4   ", "", -4,4,1,0,doNothing,noEvent,noStyle),
+  FIELD(LOOP.J1.D,  " Trk1   ", "", -3,3,1,0,doNothing,noEvent,noStyle),
+  FIELD(LOOP.J2.D,  " Trk2   ", "", -3,3,1,0,doNothing,noEvent,noStyle),
+  FIELD(LOOP.J3.D,  " Trk3   ", "", -3,3,1,0,doNothing,noEvent,noStyle),
+  FIELD(LOOP.J4.D,  " Trk4   ", "", -3,3,1,0,doNothing,noEvent,noStyle),
   EXIT("< Back"));
 
 

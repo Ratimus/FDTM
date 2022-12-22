@@ -9,17 +9,20 @@
 #include "FDTM_IO.h"
 #include "LoopSeq.h"
 
-SeqPattern::SeqPattern (int8_t pattnA, int8_t pattnB, int8_t inMode) :
+SeqPattern::SeqPattern (int8_t pattnA, int8_t pattnB) :
   seedA(pattnA),
   stepsA(pattnSteps(seedA.Q)),
   seedB(pattnB),
   stepsB(pattnSteps(seedB.Q)),
-  mode(inMode),
   playHeads {0,0,0,0},
   pendingA(1),
   pendingB(1),
   laneShift(0)
 {
+  maskies[0].setMode(BeatMask::SYNCOPATED);
+  maskies[0].setLogic(BeatMask::TYPE_STOMP);
+  maskies[0].setOffset(1);
+  maskies[3].setMode(BeatMask::SYNCOPATED);
   latchInPattern(1, true);
   latchInPattern(0, true);
 }
@@ -94,12 +97,6 @@ void SeqPattern::setNextPattern(bool A, int8_t pattern)
 // (such that the first step corresponds to the lowest bit)
 uint32_t SeqPattern::grabTrack(bool A, int8_t trk)
 {
-  if (trk < 0 || trk >= NUM_WORLD_RHYTHMS)
-  {
-    // TODO: programatically-generated patterns
-    return random(0xFFFFFFFF);
-  }
-
   uint32_t prime(0);
   if (A) { prime = primes[seedA.Q][trk+1]; }
   else   { prime = primes[seedB.Q][trk+1]; }
@@ -126,15 +123,6 @@ void SeqPattern::setNextPosn(int8_t trk, int8_t J)
 
   // Move backward (i.e. always move from S toward E, regardless of where they are)
   // Swap the start and end points, and tell it to move in the opposite direction
-  if (S > E && mode == ELASTIC_MODE)
-  {
-    int8_t tmp(S);
-    S = E;
-    E = tmp;
-    J = -J;
-    Serial.println("it's elastic!!!");
-  }
-
   P += J;
 
   // The following 6 lines took me an entire day to write.
@@ -154,7 +142,7 @@ void SeqPattern::resetPlayheads()
 {
   for (int8_t trk = 0; trk < TRAX_PER_PATN; ++trk)
   {
-    moveToBit(trk, 0);
+    playHeads[trk] = 0;
   }
 }
 
@@ -164,18 +152,18 @@ void SeqPattern::restartPlayheads()
 {
   for (int8_t trk = 0; trk < TRAX_PER_PATN; ++trk)
   {
-    moveToBit(trk, LOOP.START[trk]->Q);
+    playHeads[trk] = LOOP.START[trk]->Q % getMaxSteps();
   }
 }
 
 
-  void SeqPattern::swapTracks(bool fwd)
-  {
-    if (fwd) { ++laneShift; }
-    else     { --laneShift; }
+void SeqPattern::swapTracks(bool fwd)
+{
+  if (fwd) { ++laneShift; }
+  else     { --laneShift; }
 
-    laneShift %= TRAX_PER_PATN;
-  }
+  laneShift %= TRAX_PER_PATN;
+}
 
 // Tell me which bank to read and which track, I'll tell you 
 // what the pattern looks like at the current playhead position
@@ -192,18 +180,10 @@ bool SeqPattern::readBit(bool A, int8_t trk)
   int8_t seedNum(A ? seedA.Q : seedB.Q);
   int8_t M(A ? stepsA.Q : stepsB.Q);
 
-  // TODO: programatically generated sequences
-  if (seedNum < 0 || seedNum >= NUM_WORLD_RHYTHMS)
-  {
-    ret = (bool)(0xDEADBEEF & BITMASK_32[bitN]);
-  }
-  else
-  {
-    int8_t rB(bitN % M);
-    int8_t iB(31 - rB);
-    bool vB = (bool)(primes[seedNum][idx+1] & BITMASK_32[iB]);
-    ret = vB;
-  }
+  int8_t rB(bitN % M);
+  int8_t iB(31 - rB);
+  bool vB = (bool)(primes[seedNum][idx+1] & BITMASK_32[iB]);
+  ret = vB;
   
-  return ret;
+  return maskies[trk].readBit(rB, vB);
 }

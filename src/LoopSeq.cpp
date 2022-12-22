@@ -62,7 +62,7 @@ TrkPts::TrkPts(int8_t maxLength):
 LoopSeq::LoopSeq() :
   MODE(ELASTIC_MODE),
   PW(10),
-  ThePattn(defaultA, defaultB, MODE.D),
+  ThePattn(defaultA, defaultB),
   pattnA(ThePattn.getNextPattern(1)),
   pattnB(ThePattn.getNextPattern(0)),
   running(false),
