@@ -69,7 +69,8 @@ LoopSeq::LoopSeq() :
   pendingResetFLAG(true),
   probB(0),
   PROB_KNOB(0),
-  maxSteps(ThePattn.getMaxSteps())
+  maxSteps(ThePattn.getMaxSteps()),
+  sharedFate(true)
 {
   validatePattns();
   ThePattn.latchInPattern(1, true);
@@ -354,15 +355,21 @@ void LoopSeq::pulse(ClockSource pulseSrc)
   {
     uint8_t gateByte(0);
 
-    bool A(random(0, 100) > PROB_KNOB);
+    bool PROB[] = { (random(0, 100) > PROB_KNOB), 0, 0, 0 };
+
+    for (uint8_t trk = 1; trk < 4; ++trk)
+    {
+      if (sharedFate) { PROB[trk] = PROB[0]; }
+      else            { PROB[trk] = (random(0, 100) > PROB_KNOB); }
+    }
+
     // Serial.printf("Using %s pattern [%2d]\n", A ? "LEFT" : "RIGHT", ThePattn.getSeed(A));
 
     for (uint8_t trk = 0; trk < TRAX_PER_PATN; ++trk)
     {
       bool pulseBit(pulseByte & (1 << trk));
 
-      uint32_t lane(ThePattn.grabTrack(A, trk));
-      bool stepBit(ThePattn.readBit(A, trk));
+      bool stepBit(ThePattn.readBit(PROB[trk], trk));
       if (stepBit)
       {
         gateByte |= (pulseByte & (1 << trk));

@@ -87,7 +87,8 @@ public:
   uint16_t probB;
   uint16_t PROB_KNOB;
   int16_t  maxSteps; // Total number of valid steps in pattern (e.g. count begins at ONE)
-  
+  bool     sharedFate;
+
   void reset();
 
   void validatePattns(bool force = false);

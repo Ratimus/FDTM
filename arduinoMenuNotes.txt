@@ -1,82 +1,50 @@
-Repetitor per-track params:
- -start point
- -end point
- -offset
- -clock div
- -clock skew
+Gate inputs:
+  Clock
+  Reset
+  Mod A
+  Mod B
 
-Mask types:
-euclidean [mod = fill]
-random    [mod = probability]
-archetype [mod = role]
+Gate Mod Tgts:
+  clock src
+  clock backward
 
 
+Repetitor: per-track params:
+ 1 -Start Point
+ 2 -End Point
+ 3 -Step Offset
+ 4 -Clock Divide
+ 5 -Clock Skew
+ 6 -Track Jitter (probability step backward OR extra step fwd)
+ Mask: per-track params:
+ 7 -Mask Mod 1 (euclidean fill; other modes probability )
+ 8 -Mask Mod 2 (offset)
+ 
+idea: modes. in A/B mode, CV1 is the probability Pattern B will "fire."
+  If combo logic is "Stomp," B will replace A whenever B is active, as
+  per NE's confundowhateveris. BUT... we can select other Logic Modes.
+  E.G if Logic is "OR" we will dial in B on top of A.
+  If Logic is "NOT" we don't care what B is doing; we will invert A as we dial up
 
+Global mod params:
+w/CV offset:
+  CV1: X-Fade / Euclidean: Global Fill / Stochastic: Global Probability / TM: prob. Bit flip
+  CV2: Pattern A [re-assignable]
+  CV3: 
+  CV4: Track Swap [re-assignable]
 
- Euclidean per-track params:
- -length (determined by start and end points)
- -offset (determined by offset)
- -fill
-
- Probablistic per-track params:
- -probability of step      [e.g. pattern OR]
- -probability of !pattern  [e.g. NOT pattern]
- -probability of pattern B
-
-
-
-shadow divider: follows primary clock divider input, but applies probablistic logic to combine
-e.g. primary track SRC = pattn A
-
- -> so do we need to build the euclidean reductions into the clock dividers instead of the patterns?
-nope. we want to combo logic the patterns, not the clocks
-Euclidean + fill
-Random + probability
-
-
-
-
-pattern:   X--X--X-X--X-X-X-X-XX-X-XX-X-X-
-
-
-
-
-
-
-
-
-
- -step size (does anyone actually care about this one? - NO.)
-
-
-gate inputs:
-Clock
-Reset
-Mod 1
-Mod 2
-
-select dest. or replace track
-
-
-
-track 1 - 4:
-
-
-track 5 - 8:
-Euclidean patterns w/ length determined by tracks 1 - 4
-
-track swap
-jitter
-pattern a
-pattern b
-x-fade
+raw CV in:
+  CV5: Pattern B [re-assignable]
+  CV6: Track 5 and 6 mod / factor [re-assignable]
+  CV7: Track 7 and 8 mod / factor [re-assignable]
+  CV8: [re-assignable]
 =======================================
-Pattern A/B
-  - Xfade from A to B
+Trigger Outs:
+Gate 1 through 4: [Pattern A or Pattern B via probability]
+Gate 5 through 8: [Pattern A or Pattern B or Gates 1 - 4 or 0xFFFF] (Logic combine w/) [Euclidean or Turing]
 
-Euclidean
-  - Global fill
-
-TM
-  - Bit flip
+Modes:
+A = Pattern A ; B = Pattern B
+A = Pattern A ; B = Mask
+A = const rand; B = TM(A) . . . looks like Mask should be a latchable; mess it up but reset it to its original state
 

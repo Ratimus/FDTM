@@ -28,6 +28,7 @@ Ryan "Ratimus" Richardson
 
 #include <Arduino.h>
 #include <pgmspace.h>
+#include "Rhythms.h"
 #include "FDTM_IO.h"
 // #include "Outputs.h"
 #include "CtrlPanel.h"
