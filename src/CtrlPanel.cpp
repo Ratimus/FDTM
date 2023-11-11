@@ -179,14 +179,14 @@ uint8_t      selCH(0);
 // hw_timer_t* timer1 = NULL;               // Timer library takes care of telling this where to point
 
 // void ICACHE_RAM_ATTR onTimer1()
-// {  
+// {
 //   int8_t acc(0);
 // // RLR_DEBUG gets to line 120 but not 126
 //   for (uint8_t fd = 0; fd < 4; ++fd)
 //   {
 //     pFaders[fd]->service();
 //   }
-  
+
 //   encoder.service();
 
 //   switch(acc)
@@ -398,7 +398,7 @@ uint8_t      selCH(0);
 //     else if (gg == 0) { TheSeq.setCmd(seqCmds::clockInCmd); }
 //     else if (gg == 1) { TheSeq.setCmd(seqCmds::mod1Cmd);    }
 //     else if (gg == 2) { TheSeq.setCmd(seqCmds::mod2Cmd);    }
-//     else if (gg == 3) { resetPending = true; } 
+//     else if (gg == 3) { resetPending = true; }
 //   }
 // }
 
@@ -456,7 +456,7 @@ uint8_t      selCH(0);
 //   readGates();
 
 //   checkResets();
-  
+
 //   // Read internal clock and pulse clock dividers
 //   if (TheClock.flagReady()) { TheSeq.setCmd(seqCmds::pulseIntlCmd); }
 

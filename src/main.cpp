@@ -161,9 +161,9 @@ int8_t acc(0);
 ////////////////////////////garbage above
 // ISR for Timer 1
 void ICACHE_RAM_ATTR onTimer1()
-{  
+{
  // static int8_t acc(0);
-  
+
   for (uint8_t fd = 0; fd < 4; ++fd)
   {
     pFaders[fd]->service();
@@ -188,7 +188,7 @@ void ICACHE_RAM_ATTR onTimer1()
   modeButtonB.service();
     runButton.service();
     auxButton.service();
-  
+
 #ifdef RLR_DEBUG
   // Just debounce stuff
   for (int gg = 1; gg < NUM_GATES_IN; ++gg)
@@ -256,7 +256,7 @@ void ReadCtrls()
   {
     TheSeq.setCmd(seqCmds::mod2Cmd);
   }
-  
+
   if (bn2 == ButtonState::DoubleClicked)
   {
     TheSeq.setCmd(seqCmds::resetPendingCmd);
@@ -304,7 +304,7 @@ void ReadCtrls()
       break;
     }
   }
-  
+
   TheSeq.updateTrkBank(pCV, selCH);
 }
 
@@ -328,7 +328,7 @@ void setup()
 
   initDisplay();
   initADC();
-  
+
   // Set up the menu system
   nav.idleTask = idle;       // Function to ping when menu is suspended
   nav.idleOn();              // Start up in idle state
@@ -561,7 +561,7 @@ void setup()
 //  display.setCursor(0, 0);
 //  display.clearDisplay();
 //  display.display();
-//  
+//
 //  initADCs();
 //
   Serial.begin(115200);
@@ -585,7 +585,7 @@ void setup()
   startADCs();
   Serial.println("ADCs running");
 
-  
+
   for (int mode = 0; mode <= 4; ++mode)
   {
     Serial.printf("mode: %d\n", mode % 4);
